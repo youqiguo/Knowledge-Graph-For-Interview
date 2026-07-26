@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>知识点图谱</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+SC:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles/app.css" />
+  </head>
+  <body>
+    <div id="app" class="app-shell graph-app">
+      <header class="topbar">
+        <div class="brand">
+          <h1>Graph</h1>
+          <a class="link" href="/quiz.html">面试模拟 →</a>
+        </div>
+        <div class="toolbar" id="toolbar"></div>
+      </header>
+      <div class="main-row" id="mainRow">
+        <aside class="sidebar drawer drawer-left" id="sidebar"></aside>
+        <main class="graph-wrap">
+          <button type="button" class="fab fab-left" id="btnToggleLeft" title="搜索 / 多选" aria-label="搜索 / 多选">
+            <svg class="fab-ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="M15 15l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <button type="button" class="fab fab-right" id="btnToggleRight" title="详情面板" aria-label="详情面板">
+            <svg class="fab-ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+              <path d="M12 11v6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="12" cy="8" r="1.2" fill="currentColor"/>
+            </svg>
+          </button>
+          <div id="cy" class="cy"></div>
+          <div class="status-legend" id="statusLegend">
+            <span class="leg status-unlearned">未学习</span>
+            <span class="leg status-learning">学习中</span>
+            <span class="leg status-mastered">已掌握</span>
+            <span class="leg status-weak">需复习</span>
+          </div>
+          <div class="graph-hint" id="graphHint"></div>
+        </main>
+        <aside class="panel drawer drawer-right" id="infoPanel">
+          <p class="muted">点击节点查看详情</p>
+        </aside>
+      </div>
+    </div>
+    <script type="module" src="/src/knowledge/main.js"></script>
+  </body>
+</html>

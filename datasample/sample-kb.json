@@ -1,0 +1,260 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "cat_cpp",
+      "title": "C++基础",
+      "content": "C++ 语言核心语法、面向对象与内存模型相关基础。",
+      "aiExplorePrompt": "深入讲解 C++ 基础主题，覆盖下属知识点：virtual 关键字、override、RAII、移动语义。请对比常见误区并给出面试追问。",
+      "status": "learning",
+      "weak": false
+    },
+    {
+      "id": "cat_stl",
+      "title": "STL基础",
+      "content": "标准库容器、迭代器与常用算法。",
+      "aiExplorePrompt": "深入讲解 STL：vector、map/unordered_map、迭代器失效。结合复杂度与使用场景。",
+      "status": "learning",
+      "weak": false
+    },
+    {
+      "id": "cat_template",
+      "title": "模板基础",
+      "content": "函数模板、类模板与基础特化。",
+      "aiExplorePrompt": "讲解 C++ 模板基础：函数/类模板、特化与 SFINAE 入门，列出下属：函数模板、类模板特化。",
+      "status": "unlearned",
+      "weak": false
+    },
+    {
+      "id": "cat_thread",
+      "title": "多线程开发",
+      "content": "线程、互斥、条件变量与常见并发问题。",
+      "aiExplorePrompt": "讲解多线程：mutex、条件变量、死锁与内存序入门。下属：mutex、条件变量、死锁。",
+      "status": "unlearned",
+      "weak": true
+    }
+  ],
+  "details": [
+    {
+      "id": "det_virtual",
+      "categoryId": "cat_cpp",
+      "title": "virtual 关键字",
+      "content": "virtual 用于声明虚函数，实现运行时多态；虚析构保证通过基类指针正确析构派生类。",
+      "aiExplorePrompt": "深入解释 virtual：虚表、虚析构必要性、与 override 的关系，并给面试题。",
+      "status": "learning",
+      "weak": true,
+      "tags": ["多态", "易错"],
+      "relatedIds": ["det_override", "det_raii"],
+      "interviewQA": [
+        {
+          "id": "qa_virtual_1",
+          "question": "什么是虚函数？它如何实现多态？",
+          "answer": "虚函数通过虚表（vtable）在运行时根据对象实际类型分发调用，从而实现动态多态。基类指针/引用调用虚函数时会查对象虚表。"
+        },
+        {
+          "id": "qa_virtual_2",
+          "question": "为什么基类析构函数通常要声明为 virtual？",
+          "answer": "若通过基类指针 delete 派生类对象，非虚析构只会调用基类析构，导致派生类资源泄漏；虚析构可正确链式调用派生类析构。"
+        }
+      ]
+    },
+    {
+      "id": "det_override",
+      "categoryId": "cat_cpp",
+      "title": "override",
+      "content": "override 明确标识重写基类虚函数，签名不匹配会编译报错。",
+      "aiExplorePrompt": "对比 override 与重载/隐藏，说明为何推荐使用。",
+      "status": "mastered",
+      "weak": false,
+      "tags": ["多态"],
+      "relatedIds": ["det_virtual"],
+      "interviewQA": [
+        {
+          "id": "qa_override_1",
+          "question": "override 关键字的作用是什么？",
+          "answer": "它告诉编译器该函数意图重写基类虚函数；若签名不匹配则编译失败，避免静默隐藏基类函数。"
+        }
+      ]
+    },
+    {
+      "id": "det_raii",
+      "categoryId": "cat_cpp",
+      "title": "RAII",
+      "content": "资源获取即初始化：用对象生命周期管理资源，析构时释放。",
+      "aiExplorePrompt": "用 lock_guard/unique_ptr 说明 RAII，并联系异常安全。",
+      "status": "learning",
+      "weak": false,
+      "tags": ["资源管理"],
+      "relatedIds": ["det_virtual", "det_mutex", "det_move"],
+      "interviewQA": [
+        {
+          "id": "qa_raii_1",
+          "question": "请解释 RAII，并举一个标准库例子。",
+          "answer": "RAII 把资源绑定到对象生命周期，构造获取、析构释放。例如 std::lock_guard 在作用域结束时自动解锁，即使发生异常也能释放锁。"
+        }
+      ]
+    },
+    {
+      "id": "det_move",
+      "categoryId": "cat_cpp",
+      "title": "移动语义",
+      "content": "通过右值引用与移动构造/赋值，转移资源所有权，避免深拷贝。",
+      "aiExplorePrompt": "讲解 move、std::move、移动后对象状态，联系 vector 扩容。",
+      "status": "unlearned",
+      "weak": false,
+      "tags": ["性能"],
+      "relatedIds": ["det_raii", "det_vector"],
+      "interviewQA": [
+        {
+          "id": "qa_move_1",
+          "question": "什么是移动语义？std::move 做了什么？",
+          "answer": "移动语义允许从临时对象或将亡值转移资源。std::move 本身不移动，只是把左值转换为右值引用，以便选择移动构造/赋值。"
+        }
+      ]
+    },
+    {
+      "id": "det_vector",
+      "categoryId": "cat_stl",
+      "title": "vector",
+      "content": "动态数组，连续内存；扩容可能导致迭代器失效。",
+      "aiExplorePrompt": "讲清 capacity/size、扩容策略、reserve、迭代器失效场景。",
+      "status": "learning",
+      "weak": false,
+      "tags": ["容器", "易错"],
+      "relatedIds": ["det_move", "det_iterator_invalid"],
+      "interviewQA": [
+        {
+          "id": "qa_vector_1",
+          "question": "vector 扩容时为什么可能导致迭代器失效？",
+          "answer": "扩容会分配新缓冲区并搬迁元素，旧指针/迭代器指向已释放内存，因此失效。可用 reserve 预分配降低扩容次数。"
+        }
+      ]
+    },
+    {
+      "id": "det_map",
+      "categoryId": "cat_stl",
+      "title": "map / unordered_map",
+      "content": "map 有序红黑树；unordered_map 哈希表，平均 O(1) 查找。",
+      "aiExplorePrompt": "对比有序/无序映射的复杂度、迭代顺序与哈希冲突。",
+      "status": "learning",
+      "weak": true,
+      "tags": ["容器"],
+      "relatedIds": ["det_iterator_invalid", "det_template_fn"],
+      "interviewQA": [
+        {
+          "id": "qa_map_1",
+          "question": "map 与 unordered_map 如何选择？",
+          "answer": "需要有序遍历或自定义严格弱序时用 map（对数复杂度）；键可哈希且追求平均常数查找时用 unordered_map，但最坏可能退化，且无序。"
+        }
+      ]
+    },
+    {
+      "id": "det_iterator_invalid",
+      "categoryId": "cat_stl",
+      "title": "迭代器失效",
+      "content": "容器修改可能导致迭代器、指针、引用失效，规则因容器而异。",
+      "aiExplorePrompt": "总结 vector/list/map/unordered_map 的失效规则与安全写法。",
+      "status": "unlearned",
+      "weak": true,
+      "tags": ["易错", "容器"],
+      "relatedIds": ["det_vector", "det_map"],
+      "interviewQA": [
+        {
+          "id": "qa_iter_1",
+          "question": "在遍历 vector 时 erase 元素应注意什么？",
+          "answer": "erase 返回下一个有效迭代器，应写成 it = v.erase(it)；不要在 erase 后继续使用旧迭代器。也可用移除-擦除惯用法。"
+        }
+      ]
+    },
+    {
+      "id": "det_template_fn",
+      "categoryId": "cat_template",
+      "title": "函数模板",
+      "content": "函数模板根据实参推导生成具体函数实例。",
+      "aiExplorePrompt": "讲解模板参数推导、重载与显式实参。",
+      "status": "unlearned",
+      "weak": false,
+      "tags": ["模板"],
+      "relatedIds": ["det_template_spec", "det_map"],
+      "interviewQA": [
+        {
+          "id": "qa_tpl_1",
+          "question": "函数模板的类型参数通常如何确定？",
+          "answer": "多数情况下由调用实参自动推导；也可显式指定模板实参。推导失败或二义性会导致编译错误。"
+        }
+      ]
+    },
+    {
+      "id": "det_template_spec",
+      "categoryId": "cat_template",
+      "title": "类模板特化",
+      "content": "可为特定类型提供类模板的全特化或偏特化实现。",
+      "aiExplorePrompt": "区分全特化与偏特化，举 vector<bool> 或智能指针 deleter 例子。",
+      "status": "unlearned",
+      "weak": false,
+      "tags": ["模板"],
+      "relatedIds": ["det_template_fn"],
+      "interviewQA": [
+        {
+          "id": "qa_tpl_2",
+          "question": "什么是类模板特化？为什么需要它？",
+          "answer": "特化为某些类型提供定制实现，以优化性能或处理通用实现不适用的情况。全特化固定全部参数，偏特化固定部分模式。"
+        }
+      ]
+    },
+    {
+      "id": "det_mutex",
+      "categoryId": "cat_thread",
+      "title": "mutex",
+      "content": "互斥量保护临界区，避免数据竞争；应配合 RAII 锁使用。",
+      "aiExplorePrompt": "对比 mutex/recursive_mutex/shared_mutex，强调 lock_guard/unique_lock。",
+      "status": "learning",
+      "weak": true,
+      "tags": ["并发", "易错"],
+      "relatedIds": ["det_raii", "det_cv", "det_deadlock"],
+      "interviewQA": [
+        {
+          "id": "qa_mutex_1",
+          "question": "为什么推荐用 lock_guard 而不是手写 lock/unlock？",
+          "answer": "lock_guard 利用 RAII 在作用域结束（含异常）时自动解锁，避免漏 unlock 导致死锁或永久阻塞。"
+        }
+      ]
+    },
+    {
+      "id": "det_cv",
+      "categoryId": "cat_thread",
+      "title": "条件变量",
+      "content": "线程等待某个条件成立时使用；必须与 mutex 及虚假唤醒处理配合。",
+      "aiExplorePrompt": "讲 wait 谓词循环、notify_one/all、与伪唤醒。",
+      "status": "unlearned",
+      "weak": false,
+      "tags": ["并发"],
+      "relatedIds": ["det_mutex"],
+      "interviewQA": [
+        {
+          "id": "qa_cv_1",
+          "question": "使用 condition_variable::wait 时为什么常用 while 检查条件？",
+          "answer": "存在虚假唤醒，且条件可能在唤醒后再次不满足；while(!pred) cv.wait(lock) 或带谓词重载可正确等待。"
+        }
+      ]
+    },
+    {
+      "id": "det_deadlock",
+      "categoryId": "cat_thread",
+      "title": "死锁",
+      "content": "多个线程互相等待对方持有的锁，导致永久阻塞。",
+      "aiExplorePrompt": "死锁四条件、预防（锁顺序、try_lock、避免嵌套）。",
+      "status": "unlearned",
+      "weak": true,
+      "tags": ["并发", "易错"],
+      "relatedIds": ["det_mutex"],
+      "interviewQA": [
+        {
+          "id": "qa_deadlock_1",
+          "question": "如何预防多把锁导致的死锁？",
+          "answer": "约定全局锁顺序；使用 std::lock/scoped_lock 同时加锁；缩小临界区；避免在持锁时调用可能再获取锁的未知代码。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+.DS_Store
+*.log
+data/
+yuque-download/
+Notes/
+策划.md
+可视化.md
