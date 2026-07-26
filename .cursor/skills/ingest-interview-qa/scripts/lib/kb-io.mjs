@@ -15,12 +15,15 @@ export function defaultKbPath() {
   return path.join(projectRoot(), 'data', 'knowledge-base.json');
 }
 
+/** 可提交的样例库（优先） */
 export function sampleKbPath() {
+  const preferred = path.join(projectRoot(), 'datasample', 'sample-kb.json');
+  if (fs.existsSync(preferred)) return preferred;
   return path.join(projectRoot(), 'data', 'sample-kb.json');
 }
 
 /**
- * 确保 knowledge-base.json 存在（可从 sample 复制）
+ * 确保 knowledge-base.json 存在（可从 datasample/sample-kb.json 复制）
  * @param {string} [kbPath]
  */
 export function ensureKbFile(kbPath = defaultKbPath()) {
@@ -32,7 +35,7 @@ export function ensureKbFile(kbPath = defaultKbPath()) {
   } else {
     fs.writeFileSync(
       kbPath,
-      JSON.stringify({ version: 1, categories: [], details: [] }, null, 2),
+      JSON.stringify({ version: 1, categories: [], details: [] }, null, 2) + '\n',
       'utf8',
     );
   }
@@ -96,8 +99,34 @@ export function parseArgs(argv) {
  */
 export function readTextArg(fileOrText, fileFlag) {
   if (typeof fileFlag === 'string' && fileFlag) {
-    return fs.readFileSync(fileFlag, 'utf8');
+    const p = path.isAbsolute(fileFlag) ? fileFlag : path.join(projectRoot(), fileFlag);
+    return fs.readFileSync(p, 'utf8');
   }
   if (typeof fileOrText === 'string') return fileOrText;
   return '';
+}
+
+/**
+ * 逗号/中文逗号分隔的 id / tag 列表
+ * @param {string | boolean | undefined} value
+ * @returns {string[]}
+ */
+export function parseIdList(value) {
+  if (typeof value !== 'string' || !value.trim()) return [];
+  return value
+    .split(/[,，]/)
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
+
+/** 面经重建默认输出 */
+export function interviewQaKbPath() {
+  return path.join(projectRoot(), 'data', 'interview-qa-kb.json');
+}
+
+/** 临时文本目录（长 Q/A 写入此处再 --*-file 传入） */
+export function tmpDir() {
+  const p = path.join(projectRoot(), 'tmp');
+  fs.mkdirSync(p, { recursive: true });
+  return p;
 }

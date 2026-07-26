@@ -44,23 +44,15 @@ $env:NODE_ENV="production"; node server/index.js
 
 ## Agent Skill：知识点检索入库
 
-项目内 Skill：`.cursor/skills/ingest-interview-qa/`。
+项目内 Skill：`.cursor/skills/ingest-interview-qa/`（详见其中 `SKILL.md`）。
 
-- **权威库文件**（仅允许脚本读写）：[`data/knowledge-base.json`](data/knowledge-base.json)  
-  不存在时会从 [`data/sample-kb.json`](data/sample-kb.json) 自动复制。Agent / 大模型只提供文本与参数，**不得直接编辑**该 JSON，一律通过 `kb-search.mjs` / `kb-apply.mjs`。
-- **图谱页**仍使用浏览器 `localStorage`。脚本写入后，请在图谱页用「导入/导出 → 导入」加载该文件以同步界面。
-
-常用命令（在项目根目录）：
+- **权威库**（仅允许脚本读写）：`data/knowledge-base.json`（可从 `datasample/sample-kb.json` 初始化）、面经库 `data/interview-qa-kb.json`
+- **禁止手改 JSON**；用 `kb-search.mjs` / `kb-apply.mjs` / `kb-rebuild-from-md.mjs`
+- `kb-apply` 支持：`append-qa` · `create-detail` · `create-category` · `add-related` · `set-related` · `update-detail` · `list`
+- 图谱用 `localStorage`：脚本写入后需「导入」同步；面试模拟与库共用 `interviewQA`，抽题范围靠图谱「面试池」手动加入
 
 ```bash
-# 检索最相似的 10 个详细知识点
 node .cursor/skills/ingest-interview-qa/scripts/kb-search.mjs --query "虚函数 多态" --top 10
-
-# 追加面试问答
-node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode append-qa --detail-id det_virtual --question "..." --answer "..."
-
-# 新建详细知识点
-node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode create-detail --category-id cat_cpp --title "..." --content "..." --tags "a,b" --question "..." --answer "..."
+node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode list --kind categories
+node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode append-qa --detail-id det_xxx --question-file tmp/q.txt --answer-file tmp/a.txt
 ```
-
-把面试/技术文本交给 Agent 并提到「知识点入库」时，应自动按该 Skill 流程：抽取问答 → 代码检索 Top10 → 判定归属 → 写入 JSON。

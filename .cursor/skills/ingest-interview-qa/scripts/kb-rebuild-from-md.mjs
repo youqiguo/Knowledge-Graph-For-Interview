@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 /**
- * 从 Notes/面试问答-待确认.md + kb-clusters.mjs 重建知识点库 JSON。
- * 知识点 title/content ≠ 整题；问答写入 interviewQA；relatedIds 建边。
+ * 从面经 Markdown + kb-clusters.mjs 重建知识点库 JSON。
+ * 知识点 title/content ≠ 整题；问答写入 interviewQA；relatedIds 建边并对称补全。
  *
  *   node .cursor/skills/ingest-interview-qa/scripts/kb-rebuild-from-md.mjs
  *   node .../kb-rebuild-from-md.mjs --kb data/interview-qa-kb.json
+ *   node .../kb-rebuild-from-md.mjs --md Notes/面试问答-待确认.md --kb data/interview-qa-kb.json
+ *
+ * 默认源文 Notes/… 与输出 data/… 均在 .gitignore 中，仅本地使用。
  */
 import fs from 'fs';
 import path from 'path';

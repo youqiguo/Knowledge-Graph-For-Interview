@@ -17,8 +17,8 @@ function main() {
 
   query = query.trim();
   if (!query) {
-    console.error('用法: node kb-search.mjs --query "..." [--top 10] [--kb path]');
-    console.error('  或: node kb-search.mjs --query-file path.txt');
+    console.error('用法: node .cursor/skills/ingest-interview-qa/scripts/kb-search.mjs --query "..." [--top 10] [--kb path]');
+    console.error('  或: .../kb-search.mjs --query-file tmp/query.txt');
     process.exit(1);
   }
 

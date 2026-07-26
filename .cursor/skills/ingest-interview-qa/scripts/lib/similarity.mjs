@@ -88,18 +88,21 @@ export function weightedTf(parts) {
 
 /**
  * @param {object} detail
+ * @param {object} [category]
  * @returns {Map<string, number>}
  */
-export function detailTf(detail) {
+export function detailTf(detail, category) {
   /** @type {{ text: string, weight: number }[]} */
   const parts = [
     { text: detail.title || '', weight: 3 },
-    { text: (detail.tags || []).join(' '), weight: 2 },
+    { text: (detail.tags || []).join(' '), weight: 2.5 },
     { text: detail.content || '', weight: 1.5 },
+    { text: category?.title || '', weight: 1.2 },
   ];
   for (const qa of detail.interviewQA || []) {
-    parts.push({ text: qa.question || '', weight: 1 });
-    parts.push({ text: qa.answer || '', weight: 1 });
+    parts.push({ text: qa.question || '', weight: 1.2 });
+    // 答案权重略低，避免长答案淹没标题匹配
+    parts.push({ text: qa.answer || '', weight: 0.7 });
   }
   return weightedTf(parts);
 }
@@ -113,8 +116,8 @@ export function detailTf(detail) {
 export function searchDetails(query, details, categoryMap, top = 10) {
   const qTf = weightedTf([{ text: query, weight: 1 }]);
   const scored = details.map((d) => {
-    const score = cosine(qTf, detailTf(d));
     const cat = categoryMap.get(d.categoryId);
+    const score = cosine(qTf, detailTf(d, cat));
     const snippet = String(d.content || '')
       .replace(/\s+/g, ' ')
       .trim()
@@ -127,6 +130,8 @@ export function searchDetails(query, details, categoryMap, top = 10) {
       categoryTitle: cat?.title || d.categoryId,
       status: d.status,
       tags: d.tags || [],
+      qaCount: (d.interviewQA || []).length,
+      relatedCount: (d.relatedIds || []).length,
       snippet,
       _titleLen: String(d.title || '').length,
     };
@@ -134,6 +139,7 @@ export function searchDetails(query, details, categoryMap, top = 10) {
 
   scored.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
+    if (b.qaCount !== a.qaCount) return b.qaCount - a.qaCount;
     return a._titleLen - b._titleLen;
   });
 
