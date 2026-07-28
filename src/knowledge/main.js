@@ -1,4 +1,4 @@
-import sampleKb from '../../data/sample-kb.json';
+import sampleKb from '../../datasample/sample-kb.json';
 import { validateKnowledgeBase } from '../shared/schema.js';
 import {
   downloadJson,

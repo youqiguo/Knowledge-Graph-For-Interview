@@ -3,9 +3,10 @@ name: ingest-interview-qa
 description: >-
   Extracts interview Q&A from user text, code-searches the local knowledge base
   for top similar detail nodes, then appends QA or creates details via scripts.
-  Use when ingesting interview notes, technical Q&A, 知识点入库, 抽取问答, matching
-  knowledge points, or adding interviewQA. Never edit knowledge-base JSON by
-  hand—only via kb-search / kb-apply / kb-rebuild scripts.
+  Also refines coarse categories into finer category nodes and reclassifies
+  details. Use when ingesting interview notes, technical Q&A, 知识点入库, 抽取问答,
+  matching knowledge points, adding interviewQA, or 细化类别颗粒度. Never edit
+  knowledge-base JSON by hand—only via kb-search / kb-apply / kb-rebuild scripts.
 ---
 
 # 知识点检索入库
@@ -57,11 +58,14 @@ description: >-
 
 类别（`categories[]`）为分组；跨类边来自跨类 `relatedIds`。
 
+**类别颗粒度：** 类别本身也是「类别级知识点」，应可单独学习与着色。若某类主题过宽（下属细节跨多个可独立成块的子主题），应**拆成多个细分类别**，再把详细知识点迁入对应新类——勿长期塞在一个大类里。
+
 **入库时必须：**
 
 1. 先判断问答属于哪个知识点（已有则 `append-qa`）。
 2. 新建时：`title`/`content` = 知识点；Q/A 只进 `interviewQA`。
 3. 维护 `relatedIds`（用 `add-related` / `create-detail --related-ids`；默认对称补全）。
+4. 发现类别过粗时：先细化类别，再重分详细知识点（见下节），再继续挂 QA。
 
 ## 权威库路径
 
@@ -111,6 +115,38 @@ node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode create-detai
 node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode create-category --title "类别名" --content "说明"
 ```
 
+### 细化类别颗粒度（粗类 → 多个细分类 → 重分详细点）
+
+当已有类别主题过粗（例如「C++基础」同时塞虚函数、内存、语法糖等可独立成块的主题）时：
+
+1. **列清单**：`list --kind categories` / `list --kind details`，标出过粗类别及其下属 `detail` id。
+2. **建细分类别**：对每个子主题 `create-category`（title/content 写成可独立学习的类别知识点，非空壳分组名）。
+3. **重分详细知识点**：用 `update-detail --category-id` 把各 detail 迁到对应细分类（**不改** `interviewQA` / `relatedIds`，除非顺带需要）。
+4. **原粗类处理**（择一，向用户说明后执行）：
+   - 下属已迁空：可保留为空壳供对照，或后续由用户决定是否废弃（当前脚本无 delete-category，勿手删 JSON）。
+   - 仍有合理共性细节：可收窄原类 title/content，只留真正属于该粗主题的点。
+5. **大批量面经库**：优先改 `kb-clusters.mjs` 的类别归属后跑 `kb-rebuild-from-md.mjs`，避免逐条 apply。
+
+迁移示例：
+
+```bash
+# 新建细分类别
+node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode create-category \
+  --title "虚函数与动态多态" --content "虚表、override、动态绑定相关。"
+
+# 将详细知识点迁入新类（可改 title/tags/content；QA 不变）
+node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode update-detail \
+  --detail-id det_virtual --category-id cat_新类id
+```
+
+判定启发式（类别过粗的信号）：
+
+| 信号 | 建议 |
+|------|------|
+| 一类下细节主题明显分裂（语法 / 内存 / 并发混装） | 按子主题拆多个类别 |
+| 新 QA 很难决定挂哪一类，总落在「大杂烩」 | 先拆类再入库 |
+| 图谱上一类球过大、下属点语义跨度大 | 拆类并 `update-detail` 重分 |
+
 ### 关联边
 
 ```bash
@@ -127,6 +163,9 @@ node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode set-related 
 
 ```bash
 node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode update-detail --detail-id det_x --title "新标题" --tags "a,b" --content-file tmp/c.txt
+
+# 改归属类别（细化颗粒度后重分类）
+node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode update-detail --detail-id det_x --category-id cat_yyy
 ```
 
 ### 面经 MD 批量重建
@@ -146,6 +185,7 @@ node .cursor/skills/ingest-interview-qa/scripts/kb-rebuild-from-md.mjs --kb data
 
 ```
 Task Progress:
+- [ ] 0. （可选）类别过粗 → 拆细分类别 → update-detail 重分详细点
 - [ ] 1. 抽取问答（仅文本）
 - [ ] 2. 提炼所属知识点 title + content（若需新建）
 - [ ] 3. 推测检索词
@@ -162,7 +202,8 @@ Task Progress:
 | 明确属于已有详细知识点 | `append-qa`；缺边则 `add-related` |
 | Top10 均不相关 / Top1 偏低且不符 | `create-detail`（+ QA + related） |
 | 无合适类别 | 先 `create-category` 再 `create-detail` |
-| 大批面经 MD | 改 `kb-clusters.mjs` 后 `kb-rebuild-from-md.mjs` |
+| 已有类别颗粒度太粗 | 先 `create-category` 建多个细分类，再 `update-detail --category-id` 重分已有详细点；然后再挂新 QA |
+| 大批面经 MD | 改 `kb-clusters.mjs`（含更细类别划分）后 `kb-rebuild-from-md.mjs` |
 
 ### 确认策略
 
