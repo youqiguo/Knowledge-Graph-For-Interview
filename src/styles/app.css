@@ -658,6 +658,7 @@ label {
   width: 100%;
   margin: 0 auto;
   padding: 24px 16px 48px;
+  overflow-y: auto;
 }
 
 .quiz-card {
@@ -666,6 +667,17 @@ label {
   border-radius: 12px;
   padding: 20px;
   box-shadow: var(--shadow);
+}
+
+.question-stem {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #eee;
+}
+
+.question-stem > :first-child {
+  margin-top: 0;
 }
 
 .quiz-meta {
@@ -813,12 +825,29 @@ label {
   background: rgba(0, 0, 0, 0.22);
 }
 
-.q-item.status-due {
+.q-item.status-mastered {
+  border-color: rgba(80, 180, 120, 0.55);
+  opacity: 0.82;
+}
+
+.q-item.status-retry {
+  border-color: rgba(228, 87, 87, 0.55);
+}
+
+.q-item.status-weak {
   border-color: rgba(230, 162, 60, 0.55);
+}
+
+.q-item.status-mid {
+  border-color: rgba(180, 180, 100, 0.4);
 }
 
 .q-item.status-new {
   border-color: rgba(127, 109, 242, 0.4);
+}
+
+.q-item.status-ok {
+  border-color: rgba(80, 180, 120, 0.35);
 }
 
 .q-item-main {
@@ -885,14 +914,29 @@ label {
   font-weight: 500;
 }
 
-.q-item.status-due .status-chip {
+.q-item.status-retry .status-chip {
+  border-color: rgba(228, 87, 87, 0.65);
+  color: #f0a0a0;
+}
+
+.q-item.status-weak .status-chip {
   border-color: rgba(230, 162, 60, 0.65);
   color: #f0c27a;
+}
+
+.q-item.status-mid .status-chip {
+  border-color: rgba(200, 190, 100, 0.55);
+  color: #e0d88a;
 }
 
 .q-item.status-new .status-chip {
   border-color: rgba(127, 109, 242, 0.55);
   color: #c4b8ff;
+}
+
+.q-item.status-ok .status-chip {
+  border-color: rgba(80, 180, 120, 0.55);
+  color: #9fd9b5;
 }
 
 .summary-list {
@@ -935,12 +979,29 @@ label {
   background: rgba(0, 0, 0, 0.22);
 }
 
-.q-item.status-due {
+.q-item.status-mastered {
+  border-color: rgba(80, 180, 120, 0.55);
+  opacity: 0.82;
+}
+
+.q-item.status-retry {
+  border-color: rgba(228, 87, 87, 0.55);
+}
+
+.q-item.status-weak {
   border-color: rgba(230, 162, 60, 0.55);
+}
+
+.q-item.status-mid {
+  border-color: rgba(180, 180, 100, 0.4);
 }
 
 .q-item.status-new {
   border-color: rgba(127, 109, 242, 0.4);
+}
+
+.q-item.status-ok {
+  border-color: rgba(80, 180, 120, 0.35);
 }
 
 .q-item-top {
@@ -1015,14 +1076,35 @@ label {
   border-color: rgba(255, 255, 255, 0.18);
 }
 
-.status-due .chip.status-chip {
+.status-mastered .chip.status-chip,
+.q-item.status-mastered .status-chip {
+  color: #9fd9b5;
+  border-color: rgba(80, 180, 120, 0.55);
+}
+
+.status-retry .chip.status-chip {
+  color: #f0a0a0;
+  border-color: rgba(228, 87, 87, 0.5);
+}
+
+.status-weak .chip.status-chip {
   color: #ffd59a;
   border-color: rgba(230, 162, 60, 0.5);
+}
+
+.status-mid .chip.status-chip {
+  color: #e0d88a;
+  border-color: rgba(200, 190, 100, 0.45);
 }
 
 .status-new .chip.status-chip {
   color: #c8bfff;
   border-color: rgba(127, 109, 242, 0.45);
+}
+
+.status-ok .chip.status-chip {
+  color: #9fd9b5;
+  border-color: rgba(80, 180, 120, 0.45);
 }
 
 .hist-detail-list {

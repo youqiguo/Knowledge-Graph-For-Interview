@@ -27,7 +27,8 @@ description: >-
 | 脚本 | 用途 |
 |------|------|
 | `kb-search.mjs` | 检索 TopN 相似详细知识点 |
-| `kb-apply.mjs` | 写入：QA / 节点 / 关联 / 列表 |
+| `kb-apply.mjs` | 写入：QA / 节点 / 关联 / 列表（含 `update-qa`） |
+| `kb-fix-qa-stem-code.mjs` | 题干缺代码时从答案迁入代码块 |
 | `kb-rebuild-from-md.mjs` | 面经 MD + 聚类表批量重建 |
 | `kb-clusters.mjs` | 聚类定义（供 rebuild 读取，非 CLI） |
 | `kb-import-md.mjs` | **已废弃**（旧「一题一节点」） |
@@ -52,13 +53,15 @@ description: >-
 |------|------|------|------|
 | `title` | 短知识点名 | `虚表与动态多态` | 整句面试题 |
 | `content` | 原理综述 2～5 句 | 「动态多态靠虚函数……」 | 整段答案粘贴 |
-| `interviewQA` | 挂在该点下的问答 | 多条 Q/A | 答案只写进 content |
+| `interviewQA` | 挂在该点下的问答 | 多条 Q/A；**题干含答题所需代码** | 答案只写进 content；题干写「如下代码」却把代码只放在 answer |
 | `relatedIds` | 关联其他详细 id | 同主题/跨主题近邻 | 长期空且不维护 |
 | `tags` | 检索标签 | `多态,虚表` | 只写「面试」 |
 
 类别（`categories[]`）为分组；跨类边来自跨类 `relatedIds`。
 
 **类别颗粒度：** 类别本身也是「类别级知识点」，应可单独学习与着色。若某类主题过宽（下属细节跨多个可独立成块的子主题），应**拆成多个细分类别**，再把详细知识点迁入对应新类——勿长期塞在一个大类里。
+
+**面试题题干：** 凡「说出如下代码运行结果」类题目，`question` 必须自带完整代码围栏（如 ` ```cpp `）；`answer` 只留输出与解析。发现题干缺代码时用脚本修复，禁止靠前端从答案抽代码。
 
 **入库时必须：**
 
@@ -97,6 +100,21 @@ node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode list --kind 
 
 ```bash
 node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode append-qa --detail-id det_xxx --question-file tmp/q.txt --answer-file tmp/a.txt
+```
+
+### 更新已有 QA（改题干/答案）
+
+```bash
+node .cursor/skills/ingest-interview-qa/scripts/kb-apply.mjs --mode update-qa \
+  --detail-id det_xxx --qa-id qa_xxx \
+  --question-file tmp/q.txt --answer-file tmp/a.txt
+```
+
+### 批量修复：题干缺代码（从答案迁入）
+
+```bash
+node .cursor/skills/ingest-interview-qa/scripts/kb-fix-qa-stem-code.mjs --kb data/interview-qa-kb.json
+# 可加 --dry-run 只预览
 ```
 
 ### 新建详细知识点

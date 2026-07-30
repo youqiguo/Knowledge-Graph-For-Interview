@@ -3,7 +3,7 @@
  * 知识点库写入（唯一允许的变更入口之一）
  *
  * Modes:
- *   append-qa | create-detail | create-category
+ *   append-qa | update-qa | create-detail | create-category
  *   add-related | set-related | update-detail | list
  */
 import {
@@ -76,6 +76,39 @@ function main() {
       qaId,
       question,
       note: '面试模拟与知识库共用 interviewQA；需在图谱页导入 JSON 后才会进入 UI/面试池可选范围',
+    });
+    return;
+  }
+
+  if (mode === 'update-qa') {
+    const detailId = String(args['detail-id'] || '').trim();
+    const qaId = String(args['qa-id'] || '').trim();
+    if (!detailId || !qaId) fail('update-qa 需要 --detail-id 与 --qa-id');
+    const idx = kb.details.findIndex((d) => d.id === detailId);
+    if (idx < 0) fail(`找不到详细知识点: ${detailId}`);
+    const qas = [...(kb.details[idx].interviewQA || [])];
+    const qi = qas.findIndex((q) => q.id === qaId);
+    if (qi < 0) fail(`找不到问答: ${qaId}`);
+    const cur = qas[qi];
+    const patch = { ...cur };
+    if (args['question'] !== undefined || args['question-file']) {
+      patch.question = readTextArg(args['question'], args['question-file']).trim();
+    }
+    if (args['answer'] !== undefined || args['answer-file']) {
+      patch.answer = readTextArg(args['answer'], args['answer-file']).trim();
+    }
+    if (!patch.question) fail('update-qa 后 question 不能为空');
+    qas[qi] = patch;
+    const details = kb.details.slice();
+    details[idx] = { ...details[idx], interviewQA: qas };
+    saveKb({ ...kb, details }, resolved);
+    print({
+      ok: true,
+      action: 'update-qa',
+      kbPath: resolved,
+      detailId,
+      qaId,
+      questionHead: patch.question.slice(0, 120),
     });
     return;
   }
@@ -244,10 +277,11 @@ function main() {
 
   fail(
     '未知 --mode。支持:\n' +
-      '  append-qa | create-detail | create-category\n' +
+      '  append-qa | update-qa | create-detail | create-category\n' +
       '  add-related | set-related | update-detail | list\n' +
       '示例:\n' +
       '  --mode append-qa --detail-id det_x --question-file tmp/q.txt --answer-file tmp/a.txt\n' +
+      '  --mode update-qa --detail-id det_x --qa-id qa_x --question-file tmp/q.txt\n' +
       '  --mode create-detail --category-id cat_x --title "..." --related-ids det_a,det_b\n' +
       '  --mode add-related --detail-id det_x --related-ids det_a,det_b\n' +
       '  --mode list --kind categories',

@@ -27,16 +27,28 @@ function parseMd(text) {
   for (let i = 0; i < idxs.length; i++) {
     const body = normalized.slice(idxs[i].e, idxs[i + 1]?.i ?? normalized.length);
     const ir =
-      /### \d+\. (.+?)\n\n- id: `([^`]+)`\n- 来源: (.+?)\n\n\*\*答案\*\*\n\n([\s\S]*?)\n+---/g;
+      /### \d+\. (.+?)\n\n- id: `([^`]+)`\n- 来源: (.+?)\n\n([\s\S]*?)\n+---/g;
     let im;
     while ((im = ir.exec(body))) {
       const id = im[2].trim();
+      const headingQ = im[1].trim();
+      const rest = im[4].trim();
+      let question = headingQ;
+      let answer = rest;
+      const stemMatch = rest.match(/^\*\*题目\*\*\n\n([\s\S]*?)\n\n\*\*答案\*\*\n\n([\s\S]*)$/);
+      if (stemMatch) {
+        question = stemMatch[1].trim();
+        answer = stemMatch[2].trim();
+      } else {
+        const ansOnly = rest.match(/^\*\*答案\*\*\n\n([\s\S]*)$/);
+        if (ansOnly) answer = ansOnly[1].trim();
+      }
       byId.set(id, {
         id,
         theme: idxs[i].theme,
-        question: im[1].trim(),
+        question,
         source: im[3].trim(),
-        answer: im[4].trim(),
+        answer,
       });
     }
   }
